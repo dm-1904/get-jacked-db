@@ -306,9 +306,8 @@ async function main() {
         id: w.id,
         workout: w.workout,
         day: w.day,
-        userId: w.userID,
+        userID: w.userID,
       })),
-      skipDuplicates: true,
     }),
 
     /* Movements */
@@ -319,7 +318,6 @@ async function main() {
         setsPlanned: m.sets,
         workoutId: m.workoutID,
       })),
-      skipDuplicates: true,
     }),
 
     /* Sets */
@@ -331,7 +329,6 @@ async function main() {
         date: new Date(s.date),
         movementId: s.movementID,
       })),
-      skipDuplicates: true,
     }),
   ]);
 }
