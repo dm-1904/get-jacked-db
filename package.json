@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "seed": "prisma db seed"
+    "seed": "prisma db seed",
+    "clean": "ts-node prisma/clearSeed.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
