@@ -5,7 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed": "prisma db seed",
-    "clean": "ts-node prisma/clearSeed.ts"
+    "clean": "ts-node prisma/clearSeed.ts",
+    "dev": "nodemon -e ts --exec ts-node prisma/server.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
@@ -16,6 +17,7 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^6.7.0",
+    "dotenv": "^16.5.0",
     "express": "^5.1.0"
   },
   "devDependencies": {
