@@ -12,6 +12,8 @@ app.use(cors());
 app.use(express.json());
 app.use("/api", apiRouter);
 
+app.get("/health", (_req, res) => res.send("ok"));
+
 app.use((err: any, _req: any, res: any, _next: any) => {
   console.error(err);
   res.status(500).json({ message: "Internal server error" });
