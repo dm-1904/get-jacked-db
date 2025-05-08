@@ -21,6 +21,19 @@ router.post(
   }
 );
 
+router.delete("/users/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const deleted = await prisma.user.delete({ where: { id } });
+    res.json(deleted);
+  } catch (err: any) {
+    if (err.code === "P2025") {
+      return res.status(404).json({ message: "User not found" });
+    }
+    next(err);
+  }
+});
+
 // WORKOUTS
 const workoutBody = z.object({
   workout: z.string(),
@@ -40,6 +53,11 @@ router.post(
   }
 );
 
+router.get("/workouts", async (req, res) => {
+  const workouts = await prisma.workout.findMany();
+  res.json(workouts);
+});
+
 // MOVEMENTS
 const movementBody = z.object({
   movement: z.string(),
@@ -58,6 +76,11 @@ router.post(
     res.status(201).json(movement);
   }
 );
+
+router.get("/movements", async (req, res) => {
+  const movements = await prisma.movement.findMany();
+  res.json(movements);
+});
 
 // LIFT SETS
 const setBody = z.object({
