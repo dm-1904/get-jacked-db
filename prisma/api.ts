@@ -58,10 +58,34 @@ router.get("/workouts", async (req, res) => {
   res.json(workouts);
 });
 
+router.get("/workouts/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const workout = await prisma.workout.findUnique({
+      where: { id },
+      include: {
+        movements: {
+          include: { liftSets: true },
+        },
+      },
+    });
+
+    if (!workout) {
+      return res.status(404).json({ message: "Workout not found" });
+    }
+
+    res.json(workout);
+  } catch (err) {
+    next(err);
+  }
+});
+
 // MOVEMENTS
 const movementBody = z.object({
   movement: z.string(),
-  sets: z.number().int().positive(),
+  sets: z.number().int().positive().optional(),
+  setsPlanned: z.number().int().positive().optional(),
   workoutID: z.string(),
 });
 
@@ -69,17 +93,31 @@ router.post(
   "/movements",
   validateRequest({ body: movementBody }),
   async ({ body }, res) => {
-    const { workoutID, sets, ...rest } = body;
+    const { workoutID, setsPlanned, sets, ...rest } = body;
+    const count = setsPlanned ?? sets;
     const movement = await prisma.movement.create({
-      data: { ...rest, setsPlanned: sets, workoutId: workoutID },
+      data: { ...rest, setsPlanned: count, workoutId: workoutID },
     });
     res.status(201).json(movement);
   }
 );
 
-router.get("/movements", async (req, res) => {
-  const movements = await prisma.movement.findMany();
-  res.json(movements);
+router.get("/movements", async (req, res, next) => {
+  try {
+    const { workoutID } = req.query;
+    const where = workoutID ? { workoutId: String(workoutID) } : {};
+
+    const rows = await prisma.movement.findMany({ where });
+
+    const payload = rows.map((m) => ({
+      ...m,
+      sets: m.setsPlanned,
+    }));
+
+    res.json(payload);
+  } catch (err) {
+    next(err);
+  }
 });
 
 // LIFT SETS
@@ -88,6 +126,17 @@ const setBody = z.object({
   setNumber: z.number().int().positive(),
   weight: z.number().int().positive(),
   date: z.string().datetime({ offset: false }),
+});
+
+router.get("/sets", async (req, res, next) => {
+  try {
+    const { movementID } = req.query;
+    const where = movementID ? { movementId: String(movementID) } : {};
+    const sets = await prisma.liftSet.findMany({ where });
+    res.json(sets);
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.post(
