@@ -125,7 +125,7 @@ const setBody = z.object({
   movementID: z.string(),
   setNumber: z.number().int().positive(),
   weight: z.number().int().positive(),
-  date: z.string().datetime({ offset: false }),
+  date: z.coerce.date(),
 });
 
 router.get("/sets", async (req, res, next) => {
@@ -145,7 +145,7 @@ router.post(
   async ({ body }, res) => {
     const { movementID, date, ...rest } = body;
     const liftSet = await prisma.liftSet.create({
-      data: { ...rest, movementId: movementID, date: new Date(date) },
+      data: { ...rest, movementId: movementID, date: date },
     });
     res.status(201).json(liftSet);
   }
