@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
 import { z } from "zod";
 import { validateRequest } from "zod-express-middleware";
+import { encryptPassword } from "../src/auth-utils";
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -15,9 +16,20 @@ const userBody = z.object({
 router.post(
   "/users",
   validateRequest({ body: userBody }),
-  async ({ body }, res) => {
-    const user = await prisma.user.create({ data: body });
-    res.status(201).json(user);
+  async ({ body }, res, next) => {
+    try {
+      const hash = await encryptPassword(body.password);
+      const user = await prisma.user.create({
+        data: { username: body.username, password: hash },
+        select: {
+          id: true,
+          username: true,
+        },
+      });
+      res.status(201).json(user);
+    } catch (err) {
+      next(err);
+    }
   }
 );
 
